@@ -1,0 +1,105 @@
+<?php
+declare(strict_types=1);
+
+require __DIR__ . '/config.php';
+require __DIR__ . '/functions.php';
+
+$search = trim((string)($_GET['q'] ?? ''));
+
+if ($search !== '') {
+    $stmt = $conn->prepare('SELECT id, name, category, price, stock, created_at FROM products WHERE name LIKE CONCAT("%", ?, "%") OR category LIKE CONCAT("%", ?, "%") ORDER BY id DESC');
+    $stmt->bind_param('ss', $search, $search);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = $conn->query('SELECT id, name, category, price, stock, created_at FROM products ORDER BY id DESC');
+}
+
+$products = $result->fetch_all(MYSQLI_ASSOC);
+$flash = get_flash();
+?>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Product Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="container topbar-inner">
+        <div>
+            <div class="eyebrow">MINI PROJECT</div>
+            <h1>Product Manager</h1>
+            <p>Kelola produk dengan PHP + MySQL secara aman.</p>
+        </div>
+        <a class="btn btn-primary" href="create.php">+ Tambah Produk</a>
+    </div>
+</header>
+
+<main class="container page">
+    <?php if ($flash): ?>
+        <div class="alert alert-<?= e($flash['type']) ?>" role="alert">
+            <?= e($flash['message']) ?>
+        </div>
+    <?php endif; ?>
+
+    <section class="toolbar">
+        <form method="get" class="search-form">
+            <label for="q">Cari produk</label>
+            <div class="search-row">
+                <input id="q" name="q" type="search" value="<?= e($search) ?>" placeholder="Nama atau kategori...">
+                <button class="btn btn-secondary" type="submit">Cari</button>
+                <?php if ($search !== ''): ?>
+                    <a class="btn btn-ghost" href="index.php">Reset</a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </section>
+
+    <section class="section-heading">
+        <div>
+            <h2>Daftar Produk</h2>
+            <p><?= count($products) ?> produk ditemukan.</p>
+        </div>
+    </section>
+
+    <?php if (!$products): ?>
+        <div class="empty-state">
+            <h3>Belum ada produk</h3>
+            <p>Tambahkan produk pertama untuk mengisi daftar.</p>
+            <a class="btn btn-primary" href="create.php">Tambah Produk</a>
+        </div>
+    <?php else: ?>
+        <div class="product-grid">
+            <?php foreach ($products as $product): ?>
+                <article class="product-card">
+                    <div class="card-top">
+                        <span class="badge"><?= e((string)$product['category']) ?></span>
+                        <span class="product-id">#<?= e((string)$product['id']) ?></span>
+                    </div>
+
+                    <h3><?= e((string)$product['name']) ?></h3>
+                    <div class="price"><?= e(format_rupiah((float)$product['price'])) ?></div>
+
+                    <div class="meta-row">
+                        <span>Stok</span>
+                        <strong><?= e((string)$product['stock']) ?></strong>
+                    </div>
+
+                    <div class="card-actions">
+                        <a class="btn btn-secondary btn-small" href="edit.php?id=<?= (int)$product['id'] ?>">Edit</a>
+                        <form method="post" action="delete.php" onsubmit="return confirm('Hapus produk ini?');">
+                            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                            <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
+                            <button class="btn btn-danger btn-small" type="submit">Hapus</button>
+                        </form>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</main>
+</body>
+</html>
