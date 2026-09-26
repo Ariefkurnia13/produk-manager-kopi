@@ -10,7 +10,7 @@ Aplikasi CRUD manajemen produk sesuai tugas akhir Product Manager.
 - **Delete**: hapus lewat `POST` + CSRF.
 - Validasi nama minimal 3 karakter, harga > 0, stok >= 0.
 - Nama produk harus unik melalui `UNIQUE` pada database dan pengecekan error `1062`.
-- Semua query database menggunakan **prepared statement** untuk input dari pengguna.
+- Semua query `INSERT`, `SELECT`, `UPDATE`, dan `DELETE` menggunakan **PDO prepared statement**. Mode native prepares diaktifkan dengan `PDO::ATTR_EMULATE_PREPARES => false`.
 - Output memakai `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` sehingga teks seperti `<b>Promo</b>` ditampilkan sebagai teks, bukan HTML.
 - Setelah create/update/delete, aplikasi memakai pola **POST-Redirect-GET** agar refresh tidak mengirim ulang form.
 - Tampilan responsive: card membungkus rapi pada layar sempit.
@@ -28,7 +28,7 @@ Aplikasi CRUD manajemen produk sesuai tugas akhir Product Manager.
 
 ## Konfigurasi database
 
-File `config.php` memakai konfigurasi XAMPP standar:
+File `config.php` memakai **PDO** dengan konfigurasi XAMPP standar:
 
 - Host: `127.0.0.1`
 - User: `root`

@@ -10,10 +10,9 @@ if (!$id || $id < 1) {
     exit('Produk tidak ditemukan.');
 }
 
-$stmt = $conn->prepare('SELECT id, name, category, price, stock FROM products WHERE id = ?');
-$stmt->bind_param('i', $id);
-$stmt->execute();
-$product = $stmt->get_result()->fetch_assoc();
+$stmt = $pdo->prepare('SELECT id, name, category, price, stock FROM products WHERE id = ?');
+$stmt->execute([$id]);
+$product = $stmt->fetch();
 
 if (!$product) {
     http_response_code(404);
@@ -34,16 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errors) {
         try {
-            $stmt = $conn->prepare('UPDATE products SET name = ?, category = ?, price = ?, stock = ? WHERE id = ?');
+            $stmt = $pdo->prepare('UPDATE products SET name = ?, category = ?, price = ?, stock = ? WHERE id = ?');
             $priceValue = (float)$price;
             $stockValue = (int)$stock;
-            $stmt->bind_param('ssdii', $name, $category, $priceValue, $stockValue, $id);
-            $stmt->execute();
+            $stmt->execute([$name, $category, $priceValue, $stockValue, $id]);
 
             flash('success', 'Produk berhasil diperbarui.');
             redirect('index.php');
-        } catch (mysqli_sql_exception $e) {
-            if ($e->getCode() === 1062) {
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000' && ($e->errorInfo[1] ?? null) === 1062) {
                 $errors[] = 'Nama produk sudah digunakan. Gunakan nama yang unik.';
             } else {
                 $errors[] = 'Produk gagal diperbarui.';

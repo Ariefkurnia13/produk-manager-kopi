@@ -19,17 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errors) {
         try {
-            $stmt = $conn->prepare('INSERT INTO products (name, category, price, stock) VALUES (?, ?, ?, ?)');
+            $stmt = $pdo->prepare('INSERT INTO products (name, category, price, stock) VALUES (?, ?, ?, ?)');
             $priceValue = (float)$price;
             $stockValue = (int)$stock;
-            $stmt->bind_param('ssdi', $name, $category, $priceValue, $stockValue);
-            $stmt->execute();
+            $stmt->execute([$name, $category, $priceValue, $stockValue]);
 
             clear_old();
             flash('success', 'Produk berhasil ditambahkan.');
             redirect('index.php');
-        } catch (mysqli_sql_exception $e) {
-            if ($e->getCode() === 1062) {
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000' && ($e->errorInfo[1] ?? null) === 1062) {
                 $errors[] = 'Nama produk sudah digunakan. Gunakan nama yang unik.';
             } else {
                 $errors[] = 'Produk gagal disimpan. Periksa koneksi atau struktur database.';

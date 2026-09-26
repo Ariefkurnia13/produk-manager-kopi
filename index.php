@@ -7,15 +7,19 @@ require __DIR__ . '/functions.php';
 $search = trim((string)($_GET['q'] ?? ''));
 
 if ($search !== '') {
-    $stmt = $conn->prepare('SELECT id, name, category, price, stock, created_at FROM products WHERE name LIKE CONCAT("%", ?, "%") OR category LIKE CONCAT("%", ?, "%") ORDER BY id DESC');
-    $stmt->bind_param('ss', $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $pdo->prepare('SELECT id, name, category, price, stock, created_at FROM products WHERE name LIKE :name_search OR category LIKE :category_search ORDER BY id DESC');
+    $searchLike = '%' . $search . '%';
+    $stmt->execute([
+        ':name_search' => $searchLike,
+        ':category_search' => $searchLike,
+    ]);
 } else {
-    $result = $conn->query('SELECT id, name, category, price, stock, created_at FROM products ORDER BY id DESC');
+    // Tetap gunakan prepared statement walaupun query ini tidak menerima input pengguna.
+    $stmt = $pdo->prepare('SELECT id, name, category, price, stock, created_at FROM products ORDER BY id DESC');
+    $stmt->execute();
 }
 
-$products = $result->fetch_all(MYSQLI_ASSOC);
+$products = $stmt->fetchAll();
 $flash = get_flash();
 ?>
 <!doctype html>
@@ -23,7 +27,7 @@ $flash = get_flash();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Product Manager</title>
+    <title>Manajemen produk</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,7 +35,7 @@ $flash = get_flash();
     <div class="container topbar-inner">
         <div>
             <div class="eyebrow">MINI PROJECT</div>
-            <h1>Product Manager</h1>
+            <h1>Manajemen Produk</h1>
             <p>Kelola produk dengan PHP + MySQL secara aman.</p>
         </div>
         <a class="btn btn-primary" href="create.php">+ Tambah Produk</a>

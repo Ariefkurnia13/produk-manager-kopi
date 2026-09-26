@@ -17,11 +17,10 @@ if (!$id || $id < 1) {
     redirect('index.php');
 }
 
-$stmt = $conn->prepare('DELETE FROM products WHERE id = ?');
-$stmt->bind_param('i', $id);
-$stmt->execute();
+$stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
+$stmt->execute([$id]);
 
-if ($stmt->affected_rows > 0) {
+if ($stmt->rowCount() > 0) {
     flash('success', 'Produk berhasil dihapus.');
 } else {
     flash('error', 'Produk tidak ditemukan atau sudah dihapus.');
