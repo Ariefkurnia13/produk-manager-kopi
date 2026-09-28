@@ -34,9 +34,9 @@ $flash = get_flash();
 <header class="topbar">
     <div class="container topbar-inner">
         <div>
-            <div class="eyebrow">MINI PROJECT</div>
-            <h1>Manajemen Produk</h1>
-            <p>Kelola produk dengan PHP + MySQL secara aman.</p>
+            <div class="eyebrow">WEB MANAJEMEN</div>
+            <h1>MANAJEMEN PRODUK</h1>
+            <p>SISTEM PENGELOLAAN DATA PRODUK</p>
         </div>
         <a class="btn btn-primary" href="create.php">+ Tambah Produk</a>
     </div>

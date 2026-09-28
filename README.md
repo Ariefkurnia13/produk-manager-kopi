@@ -24,7 +24,7 @@ Aplikasi CRUD manajemen produk sesuai tugas akhir Product Manager.
 4. Import file `database.sql` atau buka SQL lalu jalankan seluruh isinya.
 5. Pastikan database bernama `product_manager` sudah ada.
 6. Buka:
-   `http://localhost/product-manager/`
+   `http://localhost/product-manager-project-sistem-informasi/`
 
 ## Konfigurasi database
 
